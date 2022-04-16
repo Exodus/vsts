@@ -14,8 +14,6 @@ lazy_static! {
         settings::Settings::new().expect("config can be loaded");
 }
 
-const JWT_SECRET: &[u8] = b"test";
-
 type Result<T> = std::result::Result<T, Error>;
 type WebResult<T> = std::result::Result<T, Rejection>;
 
@@ -34,14 +32,18 @@ pub fn create_jwt() -> Result<String> {
         exp: expiration as usize,
     };
     let header = Header::new(Algorithm::HS512);
-    encode(&header, &claims, &EncodingKey::from_secret(CONFIG.jwt.secret.as_bytes()))
-        .map_err(|_| Error::JWTTokenCreationError)
+    encode(
+        &header,
+        &claims,
+        &EncodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
+    )
+    .map_err(|_| Error::JWTTokenCreationError)
 }
 
 pub async fn validate_jwt(jwt: String) -> WebResult<String> {
     let decoded = decode::<Claims>(
         &jwt,
-        &DecodingKey::from_secret(JWT_SECRET),
+        &DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
         &Validation::new(Algorithm::HS512),
     )
     .map_err(|_| warp::reject::custom(Error::JWTTokenError))?;

@@ -5,6 +5,7 @@ use warp::Filter;
 async fn main() {
     // let root = warp::path::end().map(|| "Hello, world!");
 
+    // Path Definitions
     let link = warp::path("link")
         .and(warp::path::param())
         .map(|jwt: String| format!("JWT: {}", jwt));

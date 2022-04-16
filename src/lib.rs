@@ -1,10 +1,18 @@
-use warp::Rejection;
+use chrono::prelude::*;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use chrono::prelude::*;
+use warp::Rejection;
+#[macro_use(lazy_static)]
+extern crate lazy_static;
 
 pub mod error;
+pub mod settings;
 use error::Error;
+
+lazy_static! {
+    pub static ref CONFIG: settings::Settings =
+        settings::Settings::new().expect("config can be loaded");
+}
 
 const JWT_SECRET: &[u8] = b"test";
 

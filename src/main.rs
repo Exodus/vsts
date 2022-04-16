@@ -1,5 +1,5 @@
+use vsts::{create_jwt, error, validate_jwt, CONFIG};
 use warp::Filter;
-use vsts::{create_jwt, validate_jwt, error};
 
 #[tokio::main]
 async fn main() {
@@ -15,13 +15,9 @@ async fn main() {
 
     let gen = warp::path("gen").map(|| format!("{}", create_jwt().expect("died here")));
 
-    let routes = warp::get().and(
-        // root
-        link
-        .or(gen)
-        .or(validate)
-        .recover(error::handle_rejection),
-    );
+    let routes = warp::get().and(link.or(gen).or(validate).recover(error::handle_rejection));
 
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes)
+        .run(([127, 0, 0, 1], CONFIG.server.port))
+        .await;
 }

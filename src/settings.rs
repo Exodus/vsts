@@ -12,8 +12,14 @@ pub struct Server {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct Jwt {
+    pub secret: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
     pub server: Server,
+    pub jwt: Jwt,
     pub log: Log,
 }
 
@@ -25,7 +31,7 @@ impl Settings {
 
         s.merge(File::with_name(CONFIG_FILE_PATH))?;
 
-        s.merge(Environment::with_prefix("app").separator("__"))?;
+        s.merge(Environment::with_prefix("vsts").separator("__"))?;
 
         s.try_into()
     }

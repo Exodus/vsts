@@ -34,7 +34,7 @@ pub fn create_jwt() -> Result<String> {
         exp: expiration as usize,
     };
     let header = Header::new(Algorithm::HS512);
-    encode(&header, &claims, &EncodingKey::from_secret(JWT_SECRET))
+    encode(&header, &claims, &EncodingKey::from_secret(CONFIG.jwt.secret.as_bytes()))
         .map_err(|_| Error::JWTTokenCreationError)
 }
 

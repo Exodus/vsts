@@ -1,26 +1,13 @@
 use chrono::prelude::*;
 use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
-use serde::{Deserialize, Serialize};
 use warp::Rejection;
-#[macro_use(lazy_static)]
-extern crate lazy_static;
 
-pub mod error;
-pub mod settings;
-use error::Error;
-
-lazy_static! {
-    pub static ref CONFIG: settings::Settings =
-        settings::Settings::new().expect("config can be loaded");
-}
+use super::error::Error;
+use super::settings::CONFIG;
+use super::models;
 
 type Result<T> = std::result::Result<T, Error>;
 type WebResult<T> = std::result::Result<T, Rejection>;
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Claims {
-    exp: usize,
-}
 
 pub fn create_jwt() -> Result<String> {
     let expiration = Utc::now()
@@ -28,7 +15,7 @@ pub fn create_jwt() -> Result<String> {
         .expect("valid timestamp")
         .timestamp();
 
-    let claims = Claims {
+    let claims = models::Claims {
         exp: expiration as usize,
     };
     let header = Header::new(Algorithm::HS512);
@@ -41,12 +28,12 @@ pub fn create_jwt() -> Result<String> {
 }
 
 pub async fn validate_jwt(jwt: String) -> WebResult<String> {
-    let decoded = decode::<Claims>(
+    let decoded = decode::<models::Claims>(
         &jwt,
         &DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
         &Validation::new(Algorithm::HS512),
     )
-    .map_err(|_| warp::reject::custom(Error::JWTTokenError))?;
+    .map_err(|_| Error::JWTTokenError)?;
 
     Ok(decoded.claims.exp.to_string())
 }

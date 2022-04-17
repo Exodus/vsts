@@ -23,6 +23,11 @@ pub struct Settings {
     pub log: Log,
 }
 
+lazy_static! {
+    pub static ref CONFIG: Settings =
+        Settings::new().expect("config can be loaded");
+}
+
 const CONFIG_FILE_PATH: &str = "./config/Default.toml";
 
 impl Settings {

@@ -1,6 +1,6 @@
 use serde::Serialize;
 use std::convert::Infallible;
-use warp::{http::StatusCode, reply, Rejection, Reply};
+use warp::{http::StatusCode, Rejection, Reply};
 
 #[derive(Debug)]
 pub enum Error {
@@ -17,24 +17,24 @@ struct ErrorResponse {
 impl warp::reject::Reject for Error {}
 
 pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> {
-    if err.is_not_found() {
-        Ok(reply::with_status("Not Found", StatusCode::NOT_FOUND))
+    let (code, message) = if err.is_not_found() {
+        (StatusCode::NOT_FOUND, "Not Found".to_string())
+    } else if let Some(e) = err.find::<warp::reject::MissingHeader>() {
+        (StatusCode::BAD_REQUEST, format!("Missing Header Data: {}", e.name()))
     } else if let Some(e) = err.find::<Error>() {
         match e {
-            Error::JWTTokenError => Ok(reply::with_status(
-                "JWT Token not valid",
-                StatusCode::FORBIDDEN,
-            )),
-            Error::JWTTokenCreationError => Ok(reply::with_status(
-                "JWT token creation error",
-                StatusCode::INTERNAL_SERVER_ERROR,
-            )),
+            Error::JWTTokenError => (StatusCode::FORBIDDEN, "JWT Token not valid".to_string()),
+            Error::JWTTokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, "JWT token creation error".to_string()),
         }
     } else {
         eprintln!("unhandled rejection: {:?}", err);
-        Ok(reply::with_status(
-            "INTERNAL_SERVER_ERROR",
-            StatusCode::INTERNAL_SERVER_ERROR,
-        ))
-    }
+        (StatusCode::INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR".to_string())
+    };
+
+    let json = warp::reply::json(&ErrorResponse {
+        status: code.to_string(),
+        message,
+    });
+
+    Ok(warp::reply::with_status(json, code))
 }

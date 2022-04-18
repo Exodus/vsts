@@ -2,6 +2,8 @@
 
 Very simple JWT token generator / validator
 
+The /auth endpoint works with Traefik ForwardAuth's X-FORWARDED-Uri
+
 Config file and Environment variable overrides
 
 Env Example:

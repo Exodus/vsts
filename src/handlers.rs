@@ -28,6 +28,7 @@ pub fn create_jwt() -> Result<String> {
 }
 
 pub async fn validate_jwt(jwt: String) -> WebResult<String> {
+    println!("{}", jwt);
     let decoded = decode::<models::Claims>(
         &jwt,
         &DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
@@ -36,4 +37,12 @@ pub async fn validate_jwt(jwt: String) -> WebResult<String> {
     .map_err(|_| Error::JWTTokenError)?;
 
     Ok(decoded.claims.exp.to_string())
+}
+
+pub async fn auth(uri: warp::http::Uri) -> WebResult<String> {
+    let path = uri.path().to_string();
+    match path.strip_prefix("/link/") {
+        Some(jwt) => validate_jwt(jwt.to_string()).await,
+        None => WebResult::Err(warp::reject::custom(Error::XForwardedUriError)),
+    }
 }

@@ -6,6 +6,7 @@ use warp::{http::StatusCode, Rejection, Reply};
 pub enum Error {
     JWTTokenError,
     JWTTokenCreationError,
+    XForwardedUriError,
 }
 
 #[derive(Serialize, Debug)]
@@ -20,9 +21,10 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
     let (code, message) = if err.is_not_found() {
         (StatusCode::NOT_FOUND, "Not Found".to_string())
     } else if let Some(e) = err.find::<warp::reject::MissingHeader>() {
-        (StatusCode::BAD_REQUEST, format!("Missing Header Data: {}", e.name()))
+        (StatusCode::BAD_REQUEST, format!("Wrong Header Data: {}", e.name()))
     } else if let Some(e) = err.find::<Error>() {
         match e {
+            Error::XForwardedUriError => (StatusCode::BAD_REQUEST, "Malformed URI in X-FORWARDED-Uri Header".to_string()),
             Error::JWTTokenError => (StatusCode::FORBIDDEN, "JWT Token not valid".to_string()),
             Error::JWTTokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, "JWT token creation error".to_string()),
         }

@@ -18,5 +18,6 @@ FROM ubuntu:22.04
 WORKDIR app/
 
 COPY --from=builder /app/target/release/vsts .
+COPY config/Default.yaml ./config/Default.yaml
 
 CMD ["./vsts"]

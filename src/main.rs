@@ -24,6 +24,6 @@ async fn main() {
     let routes = warp::get().and(auth.or(gen).or(validate).recover(error::handle_rejection));
 
     warp::serve(routes)
-        .run(([127, 0, 0, 1], settings::CONFIG.server.port))
+        .run(([0, 0, 0, 0], settings::CONFIG.server.port))
         .await;
 }

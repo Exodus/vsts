@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check }  from 'k6';
 import { sleep } from 'k6';
 export const options = {
-  vus: 50,
+  vus: 200,
   duration: '30s',
 };
 
@@ -19,13 +19,22 @@ export default function () {
     '200: JWT Generated': (r) => r.status === 200,
   });
 
-  res = http.get(urls.validate + res.body)
+  let jwt = res.body;
+
+  res = http.get(urls.validate + jwt)
   check(res, {
     '200: JWT Validated': (r) => r.status === 200,
   });
 
-  // res = http.get(urls.validate + res.body)
-  // check(res, {
-  //   '200: JWT Validated': (r) => r.status === 200,
-  // });
+  res = http.get(
+    urls.link,
+    {
+      headers: {
+        'X-FORWARDED-Uri': 'http://localhost/link/' + jwt,
+      }
+    }
+  );
+  check(res, {
+    '200: JWT Link Validated': (r) => r.status === 200,
+  });
 }

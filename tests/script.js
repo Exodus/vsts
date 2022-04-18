@@ -2,14 +2,16 @@ import http from 'k6/http';
 import { check }  from 'k6';
 import { sleep } from 'k6';
 export const options = {
-  vus: 200,
+  vus: 500,
   duration: '30s',
 };
 
+const hostname = "localhost";
+const port = "3030";
 const urls = {
-  generate: "http://localhost:3030/gen",
-  validate: "http://localhost:3030/validate/",
-  link: "http://localhost:3030/auth"
+  generate: `http://${hostname}:${port}/gen`,
+  validate: `http://${hostname}:${port}/validate/`,
+  link: `http://${hostname}:${port}/auth`
 }
 
 export default function () {
@@ -30,7 +32,7 @@ export default function () {
     urls.link,
     {
       headers: {
-        'X-FORWARDED-Uri': 'http://localhost/link/' + jwt,
+        'X-FORWARDED-Uri': `http://${hostname}/link/` + jwt,
       }
     }
   );

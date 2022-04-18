@@ -21,7 +21,10 @@ async fn main() {
         .and(warp::path::param())
         .and_then(handlers::validate_jwt);
 
-    let routes = warp::get().and(auth.or(gen).or(validate).recover(error::handle_rejection));
+    let healthcheck = warp::path("healthz")
+            .map(|| format!("healthy!"));
+
+    let routes = warp::get().and(auth.or(gen).or(validate).or(healthcheck).recover(error::handle_rejection));
 
     warp::serve(routes)
         .run(([0, 0, 0, 0], settings::CONFIG.server.port))

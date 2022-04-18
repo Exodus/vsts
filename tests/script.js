@@ -2,8 +2,8 @@ import http from 'k6/http';
 import { check }  from 'k6';
 import { sleep } from 'k6';
 export const options = {
-  vus: 500,
-  duration: '30s',
+  vus: 10,
+  duration: '2s',
 };
 
 const hostname = "localhost";

@@ -40,9 +40,9 @@ pub async fn validate_jwt(jwt: String) -> WebResult<String> {
 }
 
 pub async fn auth(uri: warp::http::Uri) -> WebResult<String> {
-    let path = uri.path().to_string();
-    match path.strip_prefix("/link/") {
-        Some(jwt) => validate_jwt(jwt.to_string()).await,
+    let path = uri.path();
+    match path.rfind("/") {
+        Some(i) => validate_jwt(path[i..].trim_start_matches("/").to_string()).await,
         None => WebResult::Err(warp::reject::custom(Error::XForwardedUriError)),
     }
 }

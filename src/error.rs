@@ -1,12 +1,18 @@
 use serde::Serialize;
 use std::convert::Infallible;
 use warp::{http::StatusCode, Rejection, Reply};
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum Error {
+    #[error("JWT token not valid")]
     JWTTokenError,
+    #[error("JWT token creation error")]
     JWTTokenCreationError,
-    XForwardedUriError,
+    #[error("no auth header")]
+    NoAuthHeaderError,
+    #[error("Invalid auth header")]
+    InvalidAuthHeaderError,
 }
 
 #[derive(Serialize, Debug)]
@@ -24,9 +30,9 @@ pub async fn handle_rejection(err: Rejection) -> Result<impl Reply, Infallible> 
         (StatusCode::BAD_REQUEST, format!("Wrong Header Data: {}", e.name()))
     } else if let Some(e) = err.find::<Error>() {
         match e {
-            Error::XForwardedUriError => (StatusCode::BAD_REQUEST, "Malformed URI in X-FORWARDED-Uri Header".to_string()),
-            Error::JWTTokenError => (StatusCode::FORBIDDEN, "JWT Token not valid".to_string()),
-            Error::JWTTokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, "JWT token creation error".to_string()),
+            Error::JWTTokenError => (StatusCode::UNAUTHORIZED, e.to_string()),
+            Error::JWTTokenCreationError => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
+            _ => (StatusCode::BAD_REQUEST, e.to_string())
         }
     } else {
         eprintln!("unhandled rejection: {:?}", err);

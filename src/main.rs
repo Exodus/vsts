@@ -1,7 +1,7 @@
+use handlers::with_auth;
 use warp::Filter;
 use std::env;
 extern crate pretty_env_logger;
-#[macro_use] extern crate log;
 #[macro_use(lazy_static)]
 extern crate lazy_static;
 
@@ -19,9 +19,8 @@ async fn main() {
     }
     pretty_env_logger::init();
     // Path Definitions
-    let auth = warp::path("auth")
-        .and(warp::header::<warp::http::Uri>("X-FORWARDED-Uri"))
-        .and_then(handlers::auth);
+    let auth = warp::path!("auth")
+        .and(with_auth());
 
     let gen = warp::path("gen").map(|| format!("{}", handlers::create_jwt().expect("Expecting Create JWT Token")));
     

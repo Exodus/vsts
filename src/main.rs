@@ -30,7 +30,7 @@ async fn main() {
         .and_then(handlers::validate_jwt);
 
     let healthcheck = warp::path("healthz")
-            .map(|| format!("healthy!"));
+        .map(|| format!("healthy!"));
 
     let routes = warp::get().and(auth.or(gen).or(validate).or(healthcheck).recover(error::handle_rejection)).with(warp::log("vsts"));
 

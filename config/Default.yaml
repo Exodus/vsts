@@ -1,5 +1,5 @@
 server:
-  port: "3030"
+  port: "3000"
 
 jwt:
   secret: "test"

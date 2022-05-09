@@ -24,8 +24,7 @@ pub struct Settings {
 }
 
 lazy_static! {
-    pub static ref CONFIG: Settings =
-        Settings::new().expect("config can be loaded");
+    pub static ref CONFIG: Settings = Settings::new().expect("config can be loaded");
 }
 
 const CONFIG_FILE_PATH: &str = "./config/Default.toml";
@@ -36,7 +35,7 @@ impl Settings {
 
         s.merge(File::with_name(CONFIG_FILE_PATH))?;
 
-        s.merge(Environment::with_prefix("vsts").separator("__"))?;
+        s.merge(Environment::with_prefix("vsts").separator("_"))?;
 
         s.try_into()
     }

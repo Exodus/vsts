@@ -1,8 +1,0 @@
-server:
-  port: "3000"
-
-jwt:
-  secret: "test"
-
-log:
-  level: "info"

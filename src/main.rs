@@ -1,12 +1,7 @@
-use axum::{
-    handler::Handler,
-    http::StatusCode,
-    routing::get,
-    Router,
-};
+use axum::{handler::Handler, http::StatusCode, routing::get, Router};
 use std::net::SocketAddr;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnResponse, TraceLayer};
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Layer};
 
 #[macro_use(lazy_static)]
 extern crate lazy_static;
@@ -21,14 +16,13 @@ mod handler;
 async fn main() {
     // Setup Debugging
     tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("LOG_LEVEL").unwrap_or_else(|_| "LOG_LEVEL=info,tower_http=info".into()),
-        ))
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
+        )
         .init();
     let app = Router::new()
         .fallback(fallback.into_service())
-        .route("/healthz", get(handler::healthz))
         .route("/gen", get(handler::create_jwt))
         .route("/auth", get(handler::auth_with_header))
         .route("/auth/:token", get(handler::auth_with_path))
@@ -40,8 +34,10 @@ async fn main() {
                         .level(tracing::Level::INFO),
                 )
                 .on_response(DefaultOnResponse::new().level(tracing::Level::INFO)),
-        );
+        )
+        .route("/healthz", get(handler::healthz));
 
+    tracing::info!("Starting server, listening on port: {}", CONFIG.server.port);
     runserver(app).await;
 }
 

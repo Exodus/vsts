@@ -20,7 +20,6 @@ WORKDIR app/
 RUN apt-get update && apt-get install tini
 
 COPY --from=builder /app/target/release/vsts .
-COPY config/Default.yaml ./config/Default.yaml
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/app/vsts"]

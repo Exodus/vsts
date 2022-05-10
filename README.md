@@ -39,4 +39,4 @@ Examples:
 
 Run with secret set up by environment variable:
 
-`VSTS_JWT__SECRET="test123" ./vsts`
+`VSTS_JWT_SECRET="test" VSTS_SERVER_PORT=3030 ./vsts`

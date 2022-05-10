@@ -1,10 +1,10 @@
-use config::{Config, ConfigError, Environment, File};
+use config::{Config, ConfigError, Environment};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize, Clone)]
-pub struct Log {
-    pub level: String,
-}
+// #[derive(Debug, Deserialize, Clone)]
+// pub struct Log {
+//     pub level: String,
+// }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Server {
@@ -20,23 +20,23 @@ pub struct Jwt {
 pub struct Settings {
     pub server: Server,
     pub jwt: Jwt,
-    pub log: Log,
+    // pub log: Log,
 }
-
-lazy_static! {
-    pub static ref CONFIG: Settings = Settings::new().expect("config can be loaded");
-}
-
-const CONFIG_FILE_PATH: &str = "./config/Default.toml";
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
-        let mut s = Config::new();
+        let s = Config::builder()
+            .set_default("server.port", "3030")?
+            .set_default("jwt.secret", "test")?
+            // .set_default("log.level", "info")?
+            .add_source(Environment::with_prefix("VSTS").separator("_"))
+            .build()?;
 
-        s.merge(File::with_name(CONFIG_FILE_PATH))?;
-
-        s.merge(Environment::with_prefix("vsts").separator("_"))?;
-
-        s.try_into()
+        s.try_deserialize()
     }
+}
+
+lazy_static! {
+    #[derive(Debug)]
+    pub static ref CONFIG: Settings = Settings::new().expect("config can be loaded");
 }

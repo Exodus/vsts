@@ -9,7 +9,7 @@ RUN cargo build --release && \
     rm src/*.rs
 
 COPY src src
-RUN rm target/release/deps/vsts* && \
+RUN --mount=type=cache,target=target/release rm target/release/deps/vsts* && \
     cargo build --release
 
 #--------------------------------------------------

@@ -14,14 +14,30 @@ mod handler;
 
 #[tokio::main]
 async fn main() {
-    // Setup Debugging
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::fmt::layer()
-                .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
-        )
-        .init();
-    let app = Router::new()
+    // Setup Tracing
+    tracing();
+
+    //Setup Routes
+    let app = routes();
+
+    runserver(app).await;
+}
+
+async fn runserver(routes: axum::routing::Router) {
+    let name = env!("CARGO_PKG_NAME");
+    let version = env!("CARGO_PKG_VERSION");
+    tracing::info!("Starting {name} server (version {version}), listening on port: {}. Token duration: {} (ISO 8601)", CONFIG.server.port, CONFIG.jwt.duration);
+    let addr = SocketAddr::from(([0, 0, 0, 0], CONFIG.server.port));
+    // tracing::debug!("listening on {}", addr);
+    axum::Server::bind(&addr)
+        .serve(routes.into_make_service())
+        .with_graceful_shutdown(signal_shutdown())
+        .await
+        .unwrap()
+}
+
+fn routes() -> Router {
+    Router::new()
         .fallback(fallback.into_service())
         .route("/gen", get(handler::create_jwt))
         .route("/auth", get(handler::auth_with_header))
@@ -35,20 +51,16 @@ async fn main() {
                 )
                 .on_response(DefaultOnResponse::new().level(tracing::Level::INFO)),
         )
-        .route("/healthz", get(handler::healthz));
-
-    tracing::info!("Starting server, listening on port: {}. Token duration: {} (ISO 8601)", CONFIG.server.port, CONFIG.jwt.duration);
-    runserver(app).await;
+        .route("/healthz", get(handler::healthz))
 }
 
-async fn runserver(routes: axum::routing::Router) {
-    let addr = SocketAddr::from(([0, 0, 0, 0], CONFIG.server.port));
-    // tracing::debug!("listening on {}", addr);
-    axum::Server::bind(&addr)
-        .serve(routes.into_make_service())
-        .with_graceful_shutdown(signal_shutdown())
-        .await
-        .unwrap()
+fn tracing() {
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_filter(tracing_subscriber::filter::LevelFilter::INFO),
+        )
+        .init();
 }
 
 async fn fallback(uri: axum::http::Uri) -> impl axum::response::IntoResponse {

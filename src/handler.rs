@@ -11,7 +11,7 @@ use super::settings::CONFIG;
 
 pub async fn create_jwt() -> Result<String, Error> {
     let expiration = Utc::now()
-        .checked_add_signed(chrono::Duration::seconds(10))
+        .checked_add_signed(CONFIG.jwt.duration)
         .expect("valid timestamp")
         .timestamp();
 

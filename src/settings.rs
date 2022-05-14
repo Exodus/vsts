@@ -1,5 +1,7 @@
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
+use duration_str::deserialize_duration_chrono;
+use chrono::Duration;
 
 // #[derive(Debug, Deserialize, Clone)]
 // pub struct Log {
@@ -14,6 +16,8 @@ pub struct Server {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Jwt {
     pub secret: String,
+    #[serde(deserialize_with = "deserialize_duration_chrono")]
+    pub duration: Duration,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -28,11 +32,11 @@ impl Settings {
         let s = Config::builder()
             .set_default("server.port", "3030")?
             .set_default("jwt.secret", "test")?
+            .set_default("jwt.duration", "3d")?
             // .set_default("log.level", "info")?
             .add_source(File::with_name("settings").required(false))
             .add_source(Environment::with_prefix("VSTS").separator("_"))
             .build()?;
-
         s.try_deserialize()
     }
 }

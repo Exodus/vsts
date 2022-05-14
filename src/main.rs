@@ -37,7 +37,7 @@ async fn main() {
         )
         .route("/healthz", get(handler::healthz));
 
-    tracing::info!("Starting server, listening on port: {}", CONFIG.server.port);
+    tracing::info!("Starting server, listening on port: {}. Token duration: {} (ISO 8601)", CONFIG.server.port, CONFIG.jwt.duration);
     runserver(app).await;
 }
 

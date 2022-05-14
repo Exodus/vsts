@@ -41,9 +41,10 @@ All of which can be overriden by environment variables:
 
 VSTS_SERVER_PORT
 VSTS_JWT_SECRET
+VSTS_JWT_DURATION
 
 Examples:
 
 Run with secret set up by environment variable:
 
-`VSTS_JWT_SECRET="test" VSTS_SERVER_PORT=3030 ./vsts`
+`VSTS_JWT_SECRET="test" VSTS_SERVER_PORT=3030 VSTS_JWT_DURATION="3d 4h 10s" ./vsts`

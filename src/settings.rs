@@ -1,4 +1,4 @@
-use config::{Config, ConfigError, Environment};
+use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
 
 // #[derive(Debug, Deserialize, Clone)]
@@ -29,6 +29,7 @@ impl Settings {
             .set_default("server.port", "3030")?
             .set_default("jwt.secret", "test")?
             // .set_default("log.level", "info")?
+            .add_source(File::with_name("settings").required(false))
             .add_source(Environment::with_prefix("VSTS").separator("_"))
             .build()?;
 

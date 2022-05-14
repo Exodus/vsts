@@ -35,6 +35,13 @@ Config file and Environment variable overrides
 
 ---
 
+The server may be configured with a configuration file with a basename of `settings` and any of the following supported formats {json, yaml, toml, INI, RON, JSON5}
+
+All of which can be overriden by environment variables:
+
+VSTS_SERVER_PORT
+VSTS_JWT_SECRET
+
 Examples:
 
 Run with secret set up by environment variable:

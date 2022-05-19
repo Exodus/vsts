@@ -9,6 +9,7 @@ use super::error::Error;
 use super::model;
 use super::settings::CONFIG;
 
+/// Create and output a JWT Token
 pub async fn create_jwt() -> Result<String, Error> {
     let expiration = Utc::now()
         .checked_add_signed(CONFIG.jwt.duration)
@@ -28,10 +29,10 @@ pub async fn create_jwt() -> Result<String, Error> {
     .map_err(|_| Error::JWTTokenCreationError)
 }
 
+/// Authenticate via path
 pub async fn auth_with_path(
     axum::extract::Path(token): axum::extract::Path<String>,
 ) -> Result<String, Error> {
-    println!("{}", token);
     let decoded = jwt::decode::<model::Claims>(
         &token,
         &jwt::DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
@@ -42,15 +43,15 @@ pub async fn auth_with_path(
     Ok(decoded.claims.exp.to_string())
 }
 
+/// Authenticate via Header
 pub async fn auth_with_header(
     TypedHeader(token): TypedHeader<Authorization<Bearer>>,
 ) -> Result<String, Error> {
-    println!("{:?}", token);
     let token = token.0.token().to_string();
-    println!("{}", token);
     validate_jwt(&token)
 }
 
+/// Validate a JWT token
 pub fn validate_jwt(token: &str) -> Result<String, Error> {
     let decoded = jwt::decode::<model::Claims>(
         token,
@@ -62,6 +63,27 @@ pub fn validate_jwt(token: &str) -> Result<String, Error> {
     Ok(decoded.claims.exp.to_string())
 }
 
+///Health check
 pub async fn healthz() -> String {
     "Healthy!".to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn token_created_valid() {
+        let token = create_jwt().await.unwrap();
+        assert!(
+            !validate_jwt(&token).is_err(),
+            "token creation/validation error"
+        )
+    }
+
+    #[tokio::test]
+    async fn create_token_success() {
+        let token = create_jwt().await;
+        assert!(!token.is_err(), "token creation error");
+    }
 }

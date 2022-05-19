@@ -1,7 +1,7 @@
-use config::{Config, ConfigError, Environment, File};
-use serde::Deserialize;
-use duration_str::deserialize_duration_chrono;
 use chrono::Duration;
+use config::{Config, ConfigError, Environment, File};
+use duration_str::deserialize_duration_chrono;
+use serde::Deserialize;
 
 // #[derive(Debug, Deserialize, Clone)]
 // pub struct Log {

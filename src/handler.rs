@@ -1,7 +1,4 @@
-use axum::{
-    extract::TypedHeader,
-    headers::{authorization::Bearer, Authorization},
-};
+use axum::headers::HeaderMap;
 use chrono::prelude::*;
 use jsonwebtoken as jwt;
 
@@ -44,11 +41,13 @@ pub async fn auth_with_path(
 }
 
 /// Authenticate via Header
-pub async fn auth_with_header(
-    TypedHeader(token): TypedHeader<Authorization<Bearer>>,
-) -> Result<String, Error> {
-    let token = token.0.token().to_string();
-    validate_jwt(&token)
+pub async fn auth_with_header(headers: HeaderMap) -> Result<String, Error> {
+    let token = headers
+        .get("TOKEN")
+        .ok_or(Error::JWTTokenHeaderError)?
+        .to_str()
+        .map_err(|_| Error::JWTTokenError)?;
+    validate_jwt(token)
 }
 
 /// Validate a JWT token

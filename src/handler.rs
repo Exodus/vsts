@@ -23,7 +23,7 @@ pub async fn create_jwt() -> Result<String, Error> {
         &claims,
         &jwt::EncodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
     )
-    .map_err(|_| Error::JWTTokenCreationError)
+    .map_err(|_| Error::TokenCreation)
 }
 
 /// Authenticate via path
@@ -35,7 +35,7 @@ pub async fn auth_with_path(
         &jwt::DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
         &jwt::Validation::new(jwt::Algorithm::HS512),
     )
-    .map_err(|_| Error::JWTTokenError)?;
+    .map_err(|_| Error::InvalidToken)?;
 
     Ok(decoded.claims.exp.to_string())
 }
@@ -44,9 +44,9 @@ pub async fn auth_with_path(
 pub async fn auth_with_header(headers: HeaderMap) -> Result<String, Error> {
     let token = headers
         .get("TOKEN")
-        .ok_or(Error::JWTTokenHeaderError)?
+        .ok_or(Error::MissingTokenHeader)?
         .to_str()
-        .map_err(|_| Error::JWTTokenError)?;
+        .map_err(|_| Error::InvalidToken)?;
     validate_jwt(token)
 }
 
@@ -57,7 +57,7 @@ pub fn validate_jwt(token: &str) -> Result<String, Error> {
         &jwt::DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
         &jwt::Validation::new(jwt::Algorithm::HS512),
     )
-    .map_err(|_| Error::JWTTokenError)?;
+    .map_err(|_| Error::InvalidToken)?;
 
     Ok(decoded.claims.exp.to_string())
 }

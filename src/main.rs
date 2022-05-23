@@ -40,7 +40,7 @@ fn routes() -> Router {
     Router::new()
         .fallback(fallback.into_service())
         .route("/gen", get(handler::create_jwt))
-        .route("/auth", get(handler::auth_with_header))
+        .route("/auth", get(handler::auth_with_header_or_query))
         .route("/auth/:token", get(handler::auth_with_path))
         .layer(
             TraceLayer::new_for_http()

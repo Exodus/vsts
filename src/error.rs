@@ -8,7 +8,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("Missing TOKEN Header")]
-    MissingTokenHeader,
+    MissingToken,
     #[error("JWT token not valid")]
     InvalidToken,
     #[error("JWT token creation error")]
@@ -24,9 +24,7 @@ struct ErrorResponse {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         match self {
-            Error::MissingTokenHeader => {
-                (StatusCode::BAD_REQUEST, self.to_string()).into_response()
-            }
+            Error::MissingToken => (StatusCode::BAD_REQUEST, self.to_string()).into_response(),
             Error::InvalidToken => (StatusCode::BAD_REQUEST, self.to_string()).into_response(),
             Error::TokenCreation => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()

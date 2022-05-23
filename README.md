@@ -6,42 +6,42 @@ Very simple JWT token generator / validator. Created to use with Traefik Forward
 
 ---
 
-### GET /gen
+> ### GET /gen
 
 Generate a token in the response body.
 
 ---
 
-### GET /auth
+> ### GET /auth
 
-The /auth endpoint works expecting the following header:
-`AUTHORIZATION: Bearer <token>` where <token> is a valid generated token from the `/gen` endpoint.
+The /auth endpoint works in 3 ways.
 
-On a valid token, will respond with a status code 200 making it useful for something like Traefik ForwardAuth.
+Expecting the following header:
+`TOKEN: <token>` where `<token>` is a valid generated token from the `/gen` endpoint.
 
----
+Expecting a query param: `/auth?token=<token>`.
 
-### GET /validate
+Expecting a token in the path: `/auth/<token>`.
 
-Validates a token in the URL path after /validate: `/validate/<token>`
-
----
-
-### GET /healthz
-
-Very simple health check endpoint at: /healthz
-
-Config file and Environment variable overrides
+On a valid token, the service will respond with a status code 200 making it useful for something like Traefik ForwardAuth.
 
 ---
 
-The server may be configured with a configuration file with a basename of `settings` and any of the following supported formats {json, yaml, toml, INI, RON, JSON5}
+> ### GET /healthz
+
+Very simple health check endpoint at: `/healthz`.
+
+Config file and Environment variable overrides.
+
+---
+
+The server may be configured with a configuration file with a basename of `settings` and any of the following supported formats {json, yaml, toml, INI, RON, JSON5}.
 
 All of which can be overriden by environment variables:
 
-VSTS_SERVER_PORT
-VSTS_JWT_SECRET
-VSTS_JWT_DURATION
+- VSTS_SERVER_PORT
+- VSTS_JWT_SECRET
+- VSTS_JWT_DURATION
 
 Examples:
 

@@ -1,4 +1,7 @@
-use axum::headers::HeaderMap;
+use axum::{
+    extract::{Path, Query},
+    headers::HeaderMap,
+};
 use chrono::prelude::*;
 use jsonwebtoken as jwt;
 
@@ -27,9 +30,7 @@ pub async fn create_jwt() -> Result<String, Error> {
 }
 
 /// Authenticate via path
-pub async fn auth_with_path(
-    axum::extract::Path(token): axum::extract::Path<String>,
-) -> Result<String, Error> {
+pub async fn auth_with_path(Path(token): Path<String>) -> Result<String, Error> {
     let decoded = jwt::decode::<model::Claims>(
         &token,
         &jwt::DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
@@ -40,14 +41,33 @@ pub async fn auth_with_path(
     Ok(decoded.claims.exp.to_string())
 }
 
+pub async fn auth_with_header_or_query(
+    headers: Option<HeaderMap>,
+    query: Option<Query<model::Token>>,
+) -> Result<String, Error> {
+    if let Some(headers) = headers {
+        if headers.contains_key("TOKEN") {
+            return auth_with_header(headers).await;
+        }
+    }
+    if let Some(query) = query {
+        return auth_with_query(query).await;
+    }
+    return Err(Error::MissingToken);
+}
+
 /// Authenticate via Header
 pub async fn auth_with_header(headers: HeaderMap) -> Result<String, Error> {
     let token = headers
         .get("TOKEN")
-        .ok_or(Error::MissingTokenHeader)?
+        .ok_or(Error::MissingToken)?
         .to_str()
         .map_err(|_| Error::InvalidToken)?;
     validate_jwt(token)
+}
+
+pub async fn auth_with_query(Query(token): Query<model::Token>) -> Result<String, Error> {
+    validate_jwt(token.token.as_str())
 }
 
 /// Validate a JWT token

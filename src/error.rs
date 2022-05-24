@@ -7,7 +7,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Missing TOKEN Header")]
+    #[error("Missing TOKEN")]
     MissingToken,
     #[error("JWT token not valid")]
     InvalidToken,

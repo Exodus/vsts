@@ -14,12 +14,15 @@ Generate a token in the response body.
 
 > ### GET /auth
 
-The /auth endpoint works in 3 ways.
+The /auth endpoint works in 3 ways, in this order:
 
-Expecting the following header:
+Expecting either of the following headers:
 `TOKEN: <token>` where `<token>` is a valid generated token from the `/gen` endpoint.
+`X-Forwarded-Uri: <Uri>` where Uri contains a query parameter `token=<token>`
 
 Expecting a query param: `/auth?token=<token>`.
+
+> ### GET /auth/:token
 
 Expecting a token in the path: `/auth/<token>`.
 

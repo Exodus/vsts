@@ -1,7 +1,9 @@
 use axum::{
     extract::{Path, Query},
     headers::HeaderMap,
+    http::Uri,
 };
+use std::collections::HashMap;
 use chrono::prelude::*;
 use jsonwebtoken as jwt;
 
@@ -48,12 +50,14 @@ pub async fn auth_with_header_or_query(
     if let Some(headers) = headers {
         if headers.contains_key("TOKEN") {
             return auth_with_header(headers).await;
+        } else if headers.contains_key("X-Forwarded-Uri") {
+            return auth_with_x_forward_uri(headers).await;
         }
     }
     if let Some(query) = query {
         return auth_with_query(query).await;
     }
-    return Err(Error::MissingToken);
+    Err(Error::MissingToken)
 }
 
 /// Authenticate via Header
@@ -68,6 +72,20 @@ pub async fn auth_with_header(headers: HeaderMap) -> Result<String, Error> {
 
 pub async fn auth_with_query(Query(token): Query<model::Token>) -> Result<String, Error> {
     validate_jwt(token.token.as_str())
+}
+
+pub async fn auth_with_x_forward_uri(headers: HeaderMap) -> Result<String, Error> {
+    let header = headers
+    .get("X-Forwarded-Uri")
+    .ok_or(Error::MissingToken)?
+    .to_str()
+    .map_err(|_| Error::InvalidToken)?;
+    let uri = header.parse::<Uri>().map_err(|_| Error::InvalidToken)?;
+    match uri.query_to_map().get("token") {
+        Some(token) => validate_jwt(token),
+        None => Err(Error::MissingToken)
+    }
+    
 }
 
 /// Validate a JWT token
@@ -87,6 +105,22 @@ pub async fn healthz() -> String {
     "Healthy!".to_string()
 }
 
+trait UriQueryToMap {
+    fn query_to_map(&self) -> HashMap<&str, &str>;
+}
+
+impl UriQueryToMap for Uri {
+    fn query_to_map(&self) -> HashMap<&str, &str> {
+        let mut query_map = HashMap::new();
+        if let Some(queries) = self.query() {
+            for item in queries.split("&") {
+                item.split_once("=").and_then(|(k,v)| query_map.insert(k,v));
+            }
+        }
+        query_map
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -104,5 +138,17 @@ mod tests {
     async fn create_token_success() {
         let token = create_jwt().await;
         assert!(!token.is_err(), "token creation error");
+    }
+
+    #[test]
+    fn x_forward_uri_extract_token() {
+        let uri: Uri = "http://github.com/Exodus/vsts/auth?key=value&foo=bar&token=123".parse().unwrap();
+        let hm = HashMap::from([
+            ("key", "value"),
+            ("foo", "bar"),
+            ("token", "123"),
+            
+        ]);
+        assert_eq!(hm, uri.query_to_map());
     }
 }

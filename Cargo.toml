@@ -1,6 +1,6 @@
 [package]
 name = "vsts"
-version = "0.13.0"
+version = "0.14.0"
 authors = ["Miguel A. Alvarado V."]
 edition = "2021"
 description = "A very simple token service"

@@ -28,6 +28,8 @@ Expecting a token in the path: `/auth/<token>`.
 
 On a valid token, the service will respond with a status code 200 making it useful for something like Traefik ForwardAuth.
 
+On a missing token a 401 is returned.
+On an invalid token a 404 is returned. This can be because the token is bogus, it expired or is a different token (different secret).
 ---
 
 > ### GET /healthz

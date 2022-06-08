@@ -24,8 +24,8 @@ struct ErrorResponse {
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         match self {
-            Error::MissingToken => (StatusCode::BAD_REQUEST, self.to_string()).into_response(),
-            Error::InvalidToken => (StatusCode::BAD_REQUEST, self.to_string()).into_response(),
+            Error::MissingToken => (StatusCode::UNAUTHORIZED, self.to_string()).into_response(),
+            Error::InvalidToken => (StatusCode::NOT_FOUND, self.to_string()).into_response(),
             Error::TokenCreation => {
                 (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
             }

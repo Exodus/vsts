@@ -113,8 +113,8 @@ impl UriQueryToMap for Uri {
     fn query_to_map(&self) -> HashMap<&str, &str> {
         let mut query_map = HashMap::new();
         if let Some(queries) = self.query() {
-            for item in queries.split("&") {
-                item.split_once("=").and_then(|(k,v)| query_map.insert(k,v));
+            for item in queries.split('&') {
+                item.split_once('=').and_then(|(k,v)| query_map.insert(k,v));
             }
         }
         query_map

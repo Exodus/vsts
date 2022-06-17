@@ -1,6 +1,46 @@
 <a name="unreleased"></a>
 ## [Unreleased]
 
+### Chore
+- **deps:** bump tokio from 1.18.2 to 1.19.2
+- **deps:** bump axum from 0.5.6 to 0.5.7
+- **deps:** bump tower-http from 0.3.3 to 0.3.4
+- **deps:** bump jsonwebtoken from 7.2.0 to 8.1.0
+
+
+<a name="v0.14.0"></a>
+## [v0.14.0] - 2022-06-08
+### Refactor
+- clippy suggestion to use char instead of string
+
+
+<a name="v0.13.0"></a>
+## [v0.13.0] - 2022-05-23
+### Feat
+- get token from query parameter in the Uri in the X-Forwarded-Uri header
+
+
+<a name="v0.12.0"></a>
+## [v0.12.0] - 2022-05-23
+### Feat
+- adding support for query parameters.
+
+### Tests
+- add tests in docker build
+
+
+<a name="v0.11.0"></a>
+## [v0.11.0] - 2022-05-18
+### Chore
+- update dependencies and bump version
+- clippy
+
+### Docs
+- updating changelog
+
+### Feat
+- removing extra prints and adding tests for handlers
+
 
 <a name="v0.10.0"></a>
 ## [v0.10.0] - 2022-05-14
@@ -88,7 +128,11 @@
 - json messages, cleaner with modules
 
 
-[Unreleased]: https://github.com/Exodus/vsts/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/Exodus/vsts/compare/v0.14.0...HEAD
+[v0.14.0]: https://github.com/Exodus/vsts/compare/v0.13.0...v0.14.0
+[v0.13.0]: https://github.com/Exodus/vsts/compare/v0.12.0...v0.13.0
+[v0.12.0]: https://github.com/Exodus/vsts/compare/v0.11.0...v0.12.0
+[v0.11.0]: https://github.com/Exodus/vsts/compare/v0.10.0...v0.11.0
 [v0.10.0]: https://github.com/Exodus/vsts/compare/v0.9.0...v0.10.0
 [v0.9.0]: https://github.com/Exodus/vsts/compare/v0.8.0...v0.9.0
 [v0.8.0]: https://github.com/Exodus/vsts/compare/v0.7.0...v0.8.0

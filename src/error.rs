@@ -9,10 +9,22 @@ use thiserror::Error;
 pub enum Error {
     #[error("Missing TOKEN")]
     MissingToken,
+
     #[error("JWT token not valid - {0}")]
     InvalidToken(String),
+
     #[error("JWT token creation error")]
     TokenCreation,
+}
+
+impl Error {
+    pub fn status(&self) -> StatusCode {
+        match self {
+            Error::MissingToken => StatusCode::UNAUTHORIZED,
+            Error::InvalidToken(_) => StatusCode::NOT_FOUND,
+            Error::TokenCreation => StatusCode::INTERNAL_SERVER_ERROR
+        }
+    }
 }
 
 #[derive(Serialize, Debug)]
@@ -23,13 +35,6 @@ struct ErrorResponse {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        match self {
-            Error::MissingToken =>
-                (StatusCode::UNAUTHORIZED, self.to_string()).into_response(),
-            Error::InvalidToken(_) =>
-                (StatusCode::NOT_FOUND, self.to_string()).into_response(),
-            Error::TokenCreation =>
-                (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()).into_response()
-        }
+        (self.status(), self.to_string()).into_response()
     }
 }

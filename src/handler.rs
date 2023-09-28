@@ -38,7 +38,7 @@ pub async fn auth_with_path(Path(token): Path<String>) -> Result<String, Error> 
         &jwt::DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
         &jwt::Validation::new(jwt::Algorithm::HS512),
     )
-    .map_err(|_| Error::InvalidToken)?;
+    .map_err(|e| Error::InvalidToken(e.to_string()))?;
 
     Ok(decoded.claims.exp.to_string())
 }
@@ -66,7 +66,7 @@ pub async fn auth_with_header(headers: HeaderMap) -> Result<String, Error> {
         .get("TOKEN")
         .ok_or(Error::MissingToken)?
         .to_str()
-        .map_err(|_| Error::InvalidToken)?;
+        .map_err(|e| Error::InvalidToken(e.to_string()))?;
     validate_jwt(token)
 }
 
@@ -79,13 +79,13 @@ pub async fn auth_with_x_forward_uri(headers: HeaderMap) -> Result<String, Error
     .get("X-Forwarded-Uri")
     .ok_or(Error::MissingToken)?
     .to_str()
-    .map_err(|_| Error::InvalidToken)?;
-    let uri = header.parse::<Uri>().map_err(|_| Error::InvalidToken)?;
+    .map_err(|e| Error::InvalidToken(e.to_string()))?;
+    let uri = header.parse::<Uri>().map_err(|e| Error::InvalidToken(e.to_string()))?;
     match uri.query_to_map().get("token") {
         Some(token) => validate_jwt(token),
         None => Err(Error::MissingToken)
     }
-    
+
 }
 
 /// Validate a JWT token
@@ -95,7 +95,7 @@ pub fn validate_jwt(token: &str) -> Result<String, Error> {
         &jwt::DecodingKey::from_secret(CONFIG.jwt.secret.as_bytes()),
         &jwt::Validation::new(jwt::Algorithm::HS512),
     )
-    .map_err(|_| Error::InvalidToken)?;
+    .map_err(|e| Error::InvalidToken(e.to_string()))?;
 
     Ok(decoded.claims.exp.to_string())
 }
@@ -147,7 +147,7 @@ mod tests {
             ("key", "value"),
             ("foo", "bar"),
             ("token", "123"),
-            
+
         ]);
         assert_eq!(hm, uri.query_to_map());
     }

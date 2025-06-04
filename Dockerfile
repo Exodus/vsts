@@ -15,7 +15,7 @@ FROM ubuntu:22.04
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install tini
+RUN apt-get update && apt-get install -y tini
 
 COPY --from=builder /app/vsts .
 
